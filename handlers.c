@@ -749,13 +749,14 @@ bool handler__lregions(globals_t * vars, char **argv, unsigned argc)
 bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
 {
     uservalue_t val;
+    uservalue_t * pval = &val;
     scan_match_type_t m;
 
     USEPARAMS();
 
     if (argc == 1)
     {
-        zero_uservalue(&val);
+        zero_uservalue(pval);
     }
     else if (argc > 2)
     {
@@ -764,7 +765,28 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
     }
     else
     {
-        if (!parse_uservalue_number(argv[1], &val)) {
+        if (strcmp(argv[0], "<>") == 0) {
+            // we have 2 numbers here with .. divisor
+            char * argv_copy = strdup(argv[1]);
+            char * token = strtok(argv_copy, "..");
+            pval = malloc(sizeof(uservalue_t)*2);
+            int tokens = 0;
+            while (token) {
+                if (!parse_uservalue_number(token, &pval[tokens])) {
+                    free(argv_copy);
+                    free(pval);
+                    show_error("bad value specified, see `help %s`", argv[0]);
+                    return false;
+                }
+                token = strtok(NULL, "..");
+                tokens++;
+                if (tokens>1) {
+                    break;
+                }
+            }
+            free(argv_copy);
+        }
+        else if (!parse_uservalue_number(argv[1], pval)) {
             show_error("bad value specified, see `help %s`", argv[0]);
             return false;
         }
@@ -795,6 +817,10 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
     {
         m = (argc == 1) ? MATCHDECREASED : MATCHDECREASEDBY;
     }
+    else if (strcmp(argv[0], "<>") == 0)
+    {
+        m = MATCHRANGE;
+    }
     else
     {
         show_error("unrecogised match type seen at decinc handler.\n");
@@ -802,7 +828,9 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
     }
 
     if (vars->matches) {
-        if (checkmatches(vars, m, &val) == false) {
+        if (checkmatches(vars, m, pval) == false) {
+            if (m == MATCHRANGE)
+                free(pval);
             show_error("failed to search target address space.\n");
             return false;
         }
@@ -810,12 +838,16 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
         /* < > = != cannot be the initial scan */
         if (argc == 1)
         {
+            if (m == MATCHRANGE)
+                free(pval);
             show_error("cannot use that search without matches\n");
             return false;
         }
         else
         {
-            if (searchregions(vars, m, &val) != true) {
+            if (searchregions(vars, m, pval) != true) {
+            if (m == MATCHRANGE)
+                free(pval);
                 show_error("failed to search target address space.\n");
                 return false;
             }
@@ -827,6 +859,8 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
         show_info("enter \"help\" for other commands.\n");
     }
 
+    if (m == MATCHRANGE)
+        free(pval);
     return true;
 }
 

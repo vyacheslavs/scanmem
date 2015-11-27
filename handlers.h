@@ -118,6 +118,7 @@ bool handler__lregions(globals_t * vars, char **argv, unsigned argc);
 #define CHANGED_SHRTDOC "match all variables that have not changed since last scan"
 #define INCREASED_SHRTDOC "match values that have increased by some given number"
 #define DECREASED_SHRTDOC "match values that have decreased by some given number"
+#define RANGE_SHRTDOC "match values in range"
 
 #define GREATERTHAN_LONGDOC "usage: > [n]\n" \
                 "If n is given, match values that are greater than n.\n" \
@@ -144,6 +145,8 @@ bool handler__lregions(globals_t * vars, char **argv, unsigned argc);
                 "Otherwise match all values that have decreased. (same as `<`)\n" \
                 "You can use this in conjunction with `snapshot` if you never know its value."
 
+#define RANGE_LONGDOC "usage: <> <n>..<p>\n" \
+                "Match all numbers between <n> and <p>."
 
 bool handler__decinc(globals_t * vars, char **argv, unsigned argc);
 

@@ -126,6 +126,8 @@ bool init()
                     INCREASED_LONGDOC);
     registercommand("-", handler__decinc, vars->commands, DECREASED_SHRTDOC,
                     DECREASED_LONGDOC);
+    registercommand("<>", handler__decinc, vars->commands, RANGE_SHRTDOC,
+                    RANGE_LONGDOC);
     registercommand("\"", handler__string, vars->commands, STRING_SHRTDOC,
                     STRING_LONGDOC);
     registercommand("update", handler__update, vars->commands, UPDATE_SHRTDOC,
