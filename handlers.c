@@ -825,7 +825,7 @@ bool handler__decinc(globals_t * vars, char **argv, unsigned argc)
 
 static bool try_get_range_values ( const char * arg, uservalue_t ** pval_out ) 
 {
-    char * argv_copy = strdup(arg);
+    char * argv_copy = strdupa(arg);
 
     if (!argv_copy)
         return false;
@@ -855,7 +855,6 @@ static bool try_get_range_values ( const char * arg, uservalue_t ** pval_out )
         }
         if (!retval)
         {
-            free(argv_copy);
             free(pval);
             show_error("bad value specified in range`");
             return false;
@@ -865,7 +864,6 @@ static bool try_get_range_values ( const char * arg, uservalue_t ** pval_out )
         if (tokens>1)
             break;
     }
-    free(argv_copy);
     if ( tokens > 1 )
     {
         if (pval_out)
