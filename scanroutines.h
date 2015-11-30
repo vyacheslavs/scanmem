@@ -53,7 +53,9 @@ typedef enum {
     MATCHDECREASED,
     /* folowing: compare with both given value and old value */
     MATCHINCREASEDBY,
-    MATCHDECREASEDBY
+    MATCHDECREASEDBY,
+    /* unspecified match */
+    MATCHUNSPECIFIED
 } scan_match_type_t;
 
 
