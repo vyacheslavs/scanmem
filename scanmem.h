@@ -97,6 +97,7 @@ typedef struct {
         unsigned short detect_reverse_change;
         unsigned short dump_with_ascii;
         unsigned short reverse_endianness;
+        bool           reset_before_search_in_single_match;
     } options;
 } globals_t;
 

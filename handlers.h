@@ -301,6 +301,13 @@ bool handler__write(globals_t * vars, char **argv, unsigned argc);
                  "\t0:\tdisabled\n" \
                  "\t1:\tenabled\n" \
                  "\n" \
+                 "reset_before_search_in_single_match\twhether to reset signle result before next search\n" \
+                 "\t\t\tDefault:0\n" \
+                 "\n" \
+                 "\tpossible values:\n" \
+                 "\t0:\tdisabled\n" \
+                 "\t1:\tenabled\n" \
+                 "\n" \
                  "endianness\tendianness of data (used by: set, write and comparisons)\n" \
                  "\t\t\tDefault:0\n" \
                  "\n" \

@@ -875,6 +875,11 @@ static bool try_get_range_values ( const char * arg, uservalue_t ** pval_out )
 
 static bool do_search ( scan_match_type_t m, globals_t * vars, uservalue_t * pval, char ** argv, unsigned argc ) 
 {
+    if ( vars->options.reset_before_search_in_single_match && vars->num_matches <= 1 ) {
+        show_info("removing all previous matches before new search\n");
+        if (vars->matches) { free(vars->matches); vars->matches = NULL; vars->num_matches = 0; }
+    }
+
     if (vars->matches) {
         if (checkmatches(vars, m, pval) == false) {
             show_error("failed to search target address space.\n");
@@ -938,6 +943,11 @@ bool handler__string(globals_t * vars, char **argv, unsigned argc)
     /* need a pid for the rest of this to work */
     if (vars->target == 0) {
         return false;
+    }
+
+    if ( vars->options.reset_before_search_in_single_match && vars->num_matches <= 1 ) {
+        show_info("removing all previous matches before new search\n");
+        if (vars->matches) { free(vars->matches); vars->matches = NULL; vars->num_matches = 0; }
     }
 
     /* user has specified an exact value of the variable to find */
@@ -1036,6 +1046,11 @@ bool handler__default(globals_t * vars, char **argv, unsigned argc)
     if (vars->target == 0) {
         ret = false;
         goto retl;
+    }
+
+    if ( vars->options.reset_before_search_in_single_match && vars->num_matches <= 1 ) {
+        show_info("removing all previous matches before new search\n");
+        if (vars->matches) { free(vars->matches); vars->matches = NULL; vars->num_matches = 0; }
     }
 
     /* user has specified an exact value of the variable to find */
@@ -1704,6 +1719,16 @@ bool handler__option(globals_t * vars, char **argv, unsigned argc)
     {
         if (strcmp(argv[2], "0") == 0) {vars->options.dump_with_ascii = 0; }
         else if (strcmp(argv[2], "1") == 0) {vars->options.dump_with_ascii = 1; }
+        else
+        {
+            show_error("bad value for dump_with_ascii, see `help option`.\n");
+            return false;
+        }
+    }
+    else if (strcasecmp(argv[1], "reset_before_search_in_single_match") == 0)
+    {
+        if (strcmp(argv[2], "0") == 0) {vars->options.reset_before_search_in_single_match = false; }
+        else if (strcmp(argv[2], "1") == 0) {vars->options.reset_before_search_in_single_match = true; }
         else
         {
             show_error("bad value for dump_with_ascii, see `help option`.\n");

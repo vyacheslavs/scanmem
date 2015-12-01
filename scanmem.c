@@ -56,6 +56,8 @@ globals_t globals = {
         REGION_HEAP_STACK_EXECUTABLE_BSS, /* region_detail_level */ 
         0,                      /* detect_reverse_change */
         1,                      /* dump_with_ascii */
+        0,                      /* reverse_endianess */
+        false                   /* reset before search in single match */
     }
 };
 
