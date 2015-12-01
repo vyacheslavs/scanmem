@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <getopt.h>             /*lint -e537 */
 #include <stdbool.h>
+#include <pwd.h>
 
 #include "scanmem.h"
 #include "commands.h"
@@ -108,6 +109,39 @@ static void parse_parameter(int argc, char ** argv)
     }
 }
 
+static void read_rcfile_and_execute(globals_t * vars) {
+
+    const unsigned max_line = 1024;
+    char line[max_line+1];
+
+    struct passwd *pw = getpwuid(getuid());
+    snprintf(line, max_line, "%s/.scanmem", pw->pw_dir);
+
+    FILE * fp = fopen (line, "r");
+    if (!fp)
+        return;
+
+    unsigned commands = 0;
+
+    while( fgets(line, max_line ,fp) ) {
+        char * pe = line + strlen(line)-1;
+        while (pe != line && *pe=='\n') {
+            *pe = 0;
+            pe--;
+        }
+
+        show_info("%s\n", line);
+
+        if (execcommand(vars, line) == false) 
+            break;
+        commands++;
+    }
+    fclose(fp);
+
+    if (commands>0)
+        printf("\n");
+}
+
 int main(int argc, char **argv)
 {
     if (getuid() != 0)
@@ -132,6 +166,8 @@ int main(int argc, char **argv)
     if (execcommand(vars, "reset") == false) {
         vars->target = 0;
     }
+
+    read_rcfile_and_execute(vars);
 
     /* check if there is a target already specified */
     if (vars->target == 0) {
