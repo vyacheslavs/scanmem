@@ -79,7 +79,7 @@ static void save_current_ctx() {
 
     // if current ctx has no context id, then make it
     if ( current_global->context_id[0] == 0 ) {
-        snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%03d", ctx_counter);
+        snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%08d", ctx_counter);
         ctx_counter++;
     } else {
         element_t *np = ctx_list->head;
@@ -108,7 +108,7 @@ void create_new_context() {
     
     _current_global->target =  current_global->target;
     current_global = _current_global;
-    snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%03d", ctx_counter);
+    snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%08d", ctx_counter);
     ctx_counter++;
 
     /* create a new linked list of regions */
