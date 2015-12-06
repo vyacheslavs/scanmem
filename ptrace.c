@@ -595,8 +595,8 @@ bool searchregions(globals_t * vars, scan_match_type_t match_type, const userval
             /* check if we have a match */
             if (EXPECT(((match_length = (*g_scan_routine)(&data_value, NULL, uservalue, &checkflags, address)) > 0), false)) {
                 /* only set these flags for numbers */
-                if ((globals.options.scan_data_type != BYTEARRAY)
-                    && (globals.options.scan_data_type != STRING))
+                if ((get_globals()->options.scan_data_type != BYTEARRAY)
+                    && (get_globals()->options.scan_data_type != STRING))
                 {
                     checkflags.ineq_forwards = checkflags.ineq_reverse = 1;
                 }

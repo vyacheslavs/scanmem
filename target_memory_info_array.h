@@ -56,6 +56,7 @@ typedef struct {
 	match_flags match_info[0];
 } matches_swath;
 */
+
 typedef struct {
 	void *first_byte_in_child;
 	unsigned long number_of_bytes;

@@ -56,7 +56,7 @@ void show_user(const char *fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
-    if (!(globals.options.backend))
+    if (!(get_globals()->options.backend))
     {
         vfprintf(stderr, fmt, args);
     }
@@ -67,7 +67,7 @@ void show_debug(const char *fmt, ...)
 {
     va_list args;
     va_start (args, fmt);
-    if (globals.options.debug)
+    if (get_globals()->options.debug)
     {
         fprintf(stderr, "debug: ");
         vfprintf(stderr, fmt, args);

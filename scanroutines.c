@@ -302,7 +302,7 @@ int scan_routine_BYTEARRAY_EQUALTO SCAN_ROUTINE_ARGUMENTS
         } 
          
         /* read next block */
-        if (!peekdata(globals.target, address+i+sizeof(int64_t), &val_buf))
+        if (!peekdata(get_globals()->target, address+i+sizeof(int64_t), &val_buf))
         {
             /* cannot read */
             return 0;
@@ -353,7 +353,7 @@ int scan_routine_STRING_EQUALTO SCAN_ROUTINE_ARGUMENTS
         } 
          
         /* read next block */
-        if (!peekdata(globals.target, address+i+sizeof(int64_t), &val_buf))
+        if (!peekdata(get_globals()->target, address+i+sizeof(int64_t), &val_buf))
         {
             /* cannot read */
             return 0;
@@ -451,7 +451,7 @@ bool choose_scanroutine(scan_data_type_t dt, scan_match_type_t mt)
 
 scan_routine_t get_scanroutine(scan_data_type_t dt, scan_match_type_t mt)
 {
-    if (globals.options.detect_reverse_change)
+    if (get_globals()->options.detect_reverse_change)
     {
         CHOOSE_ROUTINE_FOR_ALL_NUMBER_TYPES(MATCHINCREASED, INCREASED_WITH_REVERSE)
         CHOOSE_ROUTINE_FOR_ALL_NUMBER_TYPES(MATCHDECREASED, DECREASED_WITH_REVERSE)

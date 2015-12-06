@@ -363,7 +363,7 @@ bool handler__list(globals_t * vars, char **argv, unsigned argc)
         /* Only actual matches are considered */
         if (flags_to_max_width_in_bytes(flags) > 0)
         {
-            switch(globals.options.scan_data_type)
+            switch(get_globals()->options.scan_data_type)
             {
             case BYTEARRAY:
                 ; /* cheat gcc */ 
@@ -1107,6 +1107,44 @@ bool handler__exit(globals_t * vars, char **argv, unsigned argc)
     USEPARAMS();
 
     vars->exit = 1;
+    return true;
+}
+
+bool handler__ctx(globals_t * vars, char ** argv, unsigned argc) {
+
+    USEPARAMS();
+
+    if (argc == 3 && strcmp(argv[1], "name") == 0) {
+        char c;
+        unsigned int idx = 0, argv_idx = 0;
+        while (1) {
+            c = argv[2][argv_idx];
+            if (!c)
+                break;
+            if ((c>='a' && c<='z') || (c>='A' && c<='Z') ||
+                (c>='0' && c<='9')) {
+                vars->context_id[idx] = c;
+                idx++;
+                if (idx>=MAX_CONTEXT_ID_LEN)
+                    break;
+            }
+            argv_idx++;
+        }
+        vars->context_id[idx] = 0;
+    }
+
+    if (argc == 2 && strcmp(argv[1], "new")==0) {
+        create_new_context();
+        show_info("switch to new context: %s\n", vars->context_id);
+    }
+
+    if (argc == 2 && strcmp(argv[1], "list") == 0) {
+        list_contexts();
+    }
+    if (argc == 3 && strcmp(argv[1], "switch")==0) {
+        switch_context(argv[2]);
+    }
+
     return true;
 }
 

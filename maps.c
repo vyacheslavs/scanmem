@@ -186,7 +186,7 @@ bool readmaps(pid_t target, list_t * regions)
                         type = REGION_TYPE_STACK;
 
                     /* determine if this region is useful */
-                    switch (globals.options.region_scan_level)
+                    switch (get_globals()->options.region_scan_level)
                     {
                         case REGION_ALL:
                             useful = true;

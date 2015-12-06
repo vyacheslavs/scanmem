@@ -76,11 +76,14 @@ ssize_t pread(int fd, void *buf, size_t count, off_t offset);
 # define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define MAX_CONTEXT_ID_LEN 32
+
 /* global settings */
 typedef struct {
     unsigned exit:1;
     pid_t target;
     matches_and_old_values_array *matches;
+    char context_id[MAX_CONTEXT_ID_LEN];
     long num_matches;
     double scan_progress;
     list_t *regions;
@@ -112,7 +115,13 @@ typedef struct {
 #endif
 
 /* global settings */
-extern globals_t globals;
+// extern globals_t globals;
+
+globals_t * get_globals();
+
+void create_new_context();
+void list_contexts();
+void switch_context(const char * ctx);
 
 bool init();
 

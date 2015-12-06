@@ -72,10 +72,10 @@ static void parse_parameter(int argc, char ** argv)
     while (!done) {
         switch (getopt_long(argc, argv, "vhbdp:", longopts, &optindex)) {
             case 'p':
-                globals.target = (pid_t) strtoul(optarg, &end, 0);
+                get_globals()->target = (pid_t) strtoul(optarg, &end, 0);
 
                 /* check if that parsed correctly */
-                if (*end != '\0' || *optarg == '\0' || globals.target == 0) {
+                if (*end != '\0' || *optarg == '\0' || get_globals()->target == 0) {
                     show_error("invalid pid specified.\n");
                     exit(EXIT_FAILURE);
                 }
@@ -87,7 +87,7 @@ static void parse_parameter(int argc, char ** argv)
                 printhelp();
                 exit(EXIT_FAILURE);
             case 'd':
-                globals.options.debug = 1;
+                get_globals()->options.debug = 1;
                 break;
             case -1:
                 done = true;
@@ -99,10 +99,10 @@ static void parse_parameter(int argc, char ** argv)
     }
     /* parse any pid specified after arguments */
     if (optind <= argc && argv[optind]) {
-        globals.target = (pid_t) strtoul(argv[optind], &end, 0);
+        get_globals()->target = (pid_t) strtoul(argv[optind], &end, 0);
 
         /* check if that parsed correctly */
-        if (*end != '\0' || argv[optind][0] == '\0' || globals.target == 0) {
+        if (*end != '\0' || argv[optind][0] == '\0' || get_globals()->target == 0) {
             show_error("invalid pid specified.\n");
             exit(EXIT_FAILURE);
         }
@@ -152,8 +152,6 @@ int main(int argc, char **argv)
     parse_parameter(argc, argv);
 
     int ret = EXIT_SUCCESS;
-    globals_t *vars = &globals;
-
     printversion(stderr);
 
     if (!init()) {
@@ -163,14 +161,14 @@ int main(int argc, char **argv)
     }
 
     /* this will initialise matches and regions */
-    if (execcommand(vars, "reset") == false) {
-        vars->target = 0;
+    if (execcommand(get_globals(), "reset") == false) {
+        get_globals()->target = 0;
     }
 
-    read_rcfile_and_execute(vars);
+    read_rcfile_and_execute(get_globals());
 
     /* check if there is a target already specified */
-    if (vars->target == 0) {
+    if (get_globals()->target == 0) {
         show_user("Enter the pid of the process to search using the \"pid\" command.\n");
         show_user("Enter \"help\" for other commands.\n");
     } else {
@@ -178,19 +176,19 @@ int main(int argc, char **argv)
     }
 
     /* main loop, read input and process commands */
-    while (!vars->exit) {
+    while (!get_globals()->exit) {
         char *line;
 
         /* reads in a commandline from the user, and returns a pointer to it in *line */
-        if (getcommand(vars, &line) == false) {
+        if (getcommand(get_globals(), &line) == false) {
             show_error("failed to read in a command.\n");
             ret = EXIT_FAILURE;
             break;
         }
 
         /* execcommand returning failure isnt fatal, just the a command couldnt complete. */
-        if (execcommand(vars, line) == false) {
-            if (vars->target == 0) {
+        if (execcommand(get_globals(), line) == false) {
+            if (get_globals()->target == 0) {
                 show_user("Enter the pid of the process to search using the \"pid\" command.\n");
                 show_user("Enter \"help\" for other commands.\n");
             } else {
@@ -207,11 +205,11 @@ int main(int argc, char **argv)
   end:
 
     /* now free any allocated memory used */
-    l_destroy(vars->regions);
-    l_destroy(vars->commands);
+    l_destroy(get_globals()->regions);
+    l_destroy(get_globals()->commands);
 
     /* attempt to detach just in case */
-    (void) detach(vars->target);
+    (void) detach(get_globals()->target);
 
     return ret;
 }

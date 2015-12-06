@@ -38,10 +38,11 @@
 #include "show_message.h"
 
 /* global settings */
-globals_t globals = {
+globals_t globals_constructor = {
     0,                          /* exit flag */
     0,                          /* pid target */
     NULL,                       /* matches */
+    {0,0,0,0,0,0,0,0},
     0,                          /* match count */
     0,                          /* scan progress */
     NULL,                       /* regions */
@@ -61,12 +62,100 @@ globals_t globals = {
     }
 };
 
+static globals_t * current_global = NULL;
+static list_t * ctx_list = NULL;
+static unsigned int ctx_counter = 0;
+
+globals_t * get_globals() {
+    if (!current_global) {
+        current_global = (globals_t *)malloc(sizeof(globals_t));
+        *current_global = globals_constructor;
+        ctx_list = l_init();
+    }
+    return current_global;
+}
+
+static void save_current_ctx() {
+
+    // if current ctx has no context id, then make it
+    if ( current_global->context_id[0] == 0 ) {
+        snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%03d", ctx_counter);
+        ctx_counter++;
+    } else {
+        element_t *np = ctx_list->head;
+        while(np) {
+            if (strcmp(((globals_t *)np->data)->context_id, current_global->context_id)==0)
+                return;
+            np = np->next;
+        }
+    }
+    if (l_append(ctx_list, NULL, current_global)==-1)
+        return;
+}
+
+void create_new_context() {
+
+    save_current_ctx();
+
+    globals_t * _current_global = (globals_t *)malloc(sizeof(globals_t));
+    if (!_current_global)
+        return;
+    *_current_global = globals_constructor;
+    _current_global->options = current_global->options;
+    _current_global->commands = current_global->commands;
+
+    // set context id fo new automatically
+    
+    _current_global->target =  current_global->target;
+    current_global = _current_global;
+    snprintf(current_global->context_id, MAX_CONTEXT_ID_LEN, "ctx#%03d", ctx_counter);
+    ctx_counter++;
+
+    /* create a new linked list of regions */
+    if ((current_global->regions = l_init()) == NULL) {
+        show_error("sorry, there was a problem allocating memory.\n");
+        return;
+    }
+
+    /* read in maps if a pid is known */
+    if (current_global->target && readmaps(current_global->target, current_global->regions) != true) {
+        show_error("sorry, there was a problem getting a list of regions to search.\n");
+        show_warn("the pid may be invalid, or you don't have permission.\n");
+        current_global->target = 0;
+        return;
+    }
+}
+
+void switch_context(const char * ctx) {
+
+    save_current_ctx();
+
+    element_t *np = ctx_list->head;
+    while(np) {
+        if (strcmp(((globals_t *)np->data)->context_id, ctx)==0) {
+            current_global = (globals_t *)np->data;
+            show_info("switched to [%s]\n", ctx);
+            break;
+        }
+        np = np->next;
+    }
+}
+
+void list_contexts() {
+    show_info ( "listing available context\n" );
+    element_t *np = ctx_list->head;
+    while(np) {
+        show_info(" [%s] matches: %d\n",((globals_t *)np->data)->context_id, ((globals_t *)np->data)->num_matches);
+        np = np->next;
+    }
+}
+
 static void sighandler(int n)
 {
     show_error("\nKilled by signal %d.\n", n);
 
-    if (globals.target) {
-        (void) detach(globals.target);
+    if (get_globals()->target) {
+        (void) detach(get_globals()->target);
     }
 
     exit(EXIT_FAILURE);
@@ -75,7 +164,7 @@ static void sighandler(int n)
 
 bool init()
 {
-    globals_t *vars = &globals;
+    globals_t *vars = get_globals();
 
     /* before attaching to target, install signal handler to detach on error */
     if (vars->options.debug == 0) /* in debug mode, let it crash and see the core dump */
@@ -134,6 +223,8 @@ bool init()
                     STRING_LONGDOC);
     registercommand("update", handler__update, vars->commands, UPDATE_SHRTDOC,
                     UPDATE_LONGDOC);
+    registercommand("ctx", handler__ctx, vars->commands, CTX_SHRTDOC,
+                    CTX_LONGDOC);
     registercommand("exit", handler__exit, vars->commands, EXIT_SHRTDOC,
                     EXIT_LONGDOC);
     registercommand("quit", handler__exit, vars->commands, NULL, EXIT_LONGDOC);
@@ -161,19 +252,19 @@ bool init()
 /* for front-ends */
 void set_backend()
 {
-    globals.options.backend = 1;
+    get_globals()->options.backend = 1;
 }
 
 void backend_exec_cmd(const char * commandline)
 {
-    execcommand(&globals, commandline);
+    execcommand(get_globals(), commandline);
     fflush(stdout);
     fflush(stderr);
 }
 
 long get_num_matches()
 {
-    return globals.num_matches;
+    return get_globals()->num_matches;
 }
 
 const char * get_version()
@@ -183,10 +274,10 @@ const char * get_version()
 
 double get_scan_progress()
 {
-    return globals.scan_progress;
+    return get_globals()->scan_progress;
 }
 
 void reset_scan_progress()
 {
-    globals.scan_progress = 0;
+    get_globals()->scan_progress = 0;
 }

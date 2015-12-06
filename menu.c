@@ -53,7 +53,7 @@ static char *commandgenerator(const char *text, int state)
     /* reset generator if state == 0, otherwise continue from last time */
     index = state ? index : 0;
 
-    np = globals.commands ? globals.commands->head : NULL;
+    np = get_globals()->commands ? get_globals()->commands->head : NULL;
 
     len = strlen(text);
 
@@ -105,12 +105,16 @@ static char **commandcompletion(const char *text, int start, int end)
 
 bool getcommand(globals_t * vars, char **line)
 {
-    char prompt[64];
+    char prompt[64 + MAX_CONTEXT_ID_LEN];
     bool success = true;
 
     assert(vars != NULL);
 
     snprintf(prompt, sizeof(prompt), "%ld> ", vars->num_matches);
+
+    if ( vars->context_id[0]!=0) {
+        snprintf(prompt, sizeof(prompt), "%s[%ld]> ", vars->context_id, vars->num_matches);
+    }
 
     rl_readline_name = "scanmem";
     rl_attempted_completion_function = commandcompletion;

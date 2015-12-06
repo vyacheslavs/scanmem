@@ -162,6 +162,14 @@ bool handler__version(globals_t * vars, char **argv, unsigned argc);
 
 bool handler__exit(globals_t * vars, char **argv, unsigned argc);
 
+#define CTX_SHRTDOC "handles ctx command such as create, name, list and etc"
+#define CTX_LONGDOC "usage: ctx [command] args...\n" \
+                "commands: \n\n" \
+                "name - set context name\n" \
+                "new - create new context"
+
+bool handler__ctx(globals_t * vars, char ** argv, unsigned argc);
+
 #define HELP_SHRTDOC "access online documentation, use `help command` for specific help"
 #define HELP_LONGDOC "usage: help [command]\n" \
                 "If `command` is specified, print detailed information about command `command`\n" \
