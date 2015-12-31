@@ -1,0 +1,5 @@
+install/0/libscanmem.a /opt/scanmem/lib
+install/0/scanmem /opt/scanmem/bin
+install/0/libscanmem.so.1.0.0 /opt/scanmem/lib
+install/0/libscanmem.so /opt/scanmem/lib
+install/0/libscanmem.so.1 /opt/scanmem/lib
